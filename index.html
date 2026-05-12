@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boondi — Digital Paani</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #DDE5EF;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Phone shell ── */
+.scene {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  background: #F7F9FC;
+  border-radius: 44px;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.06),
+    0 24px 64px rgba(0,0,0,0.16),
+    0 8px 20px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+/* subtle dot-grid background */
+.plant-bg {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #CBD5E1 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.45;
+}
+
+/* ── Status bar ── */
+.status-bar {
+  position: absolute;
+  top: 0;
+  inset-x: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 20;
+}
+.status-time { font-size: 13px; font-weight: 600; color: #1E293B; }
+.status-icons { display: flex; gap: 4px; align-items: center; color: #1E293B; }
+
+/* ── Header ── */
+.app-header {
+  position: absolute;
+  top: 44px;
+  inset-x: 0;
+  height: 56px;
+  background: white;
+  border-bottom: 1px solid #EEF2F7;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  z-index: 20;
+}
+.header-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(145deg, #60A5FA 0%, #2563EB 100%);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.header-title { font-size: 15px; font-weight: 600; color: #1E293B; }
+.header-sub   { font-size: 11px; color: #94A3B8; margin-left: auto; }
+
+/* ── Equipment scene (content area) ── */
+.content {
+  position: absolute;
+  top: 100px; bottom: 0; left: 0; right: 0;
+  overflow: hidden;
+}
+
+/* ── Pipe lines (SVG layer) ── */
+.pipes-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ── Equipment nodes ── */
+.eq-node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.eq-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.eq-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #64748B;
+  text-align: center;
+}
+
+/* CASS Basin - large rectangle */
+.cass-basin {
+  position: absolute;
+  top: 90px; left: 110px;
+  width: 196px; height: 114px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 2px solid #93C5FD;
+  overflow: hidden;
+}
+.basin-label {
+  position: absolute;
+  bottom: 8px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px; font-weight: 700;
+  color: #3B82F6; letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.basin-zones {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+.basin-zone {
+  flex: 1;
+  border-right: 1px dashed #BFDBFE;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+  font-size: 8px;
+  font-weight: 600;
+  color: #93C5FD;
+  letter-spacing: 0.04em;
+}
+.basin-zone:last-child { border-right: none; }
+
+/* Impeller icons inside basin */
+.impeller {
+  position: absolute;
+  top: 28px;
+  width: 36px; height: 36px;
+}
+
+/* Blower nodes */
+#blower1 { top: 88px; left: 24px; }
+#blower2 { top: 196px; left: 24px; }  /* ← Boondi goes here */
+#blower3 { top: 304px; left: 24px; }
+
+.blower-body {
+  width: 58px; height: 58px;
+  background: #FEFCE8;
+  border-color: #FCD34D;
+  color: #92400E;
+}
+.blower-icon { font-size: 18px; line-height: 1; }
+.blower-label-text { font-size: 9px; font-weight: 700; color: #92400E; }
+
+/* Inlet valve */
+#inlet-valve {
+  position: absolute;
+  top: 24px; left: 20px;
+}
+.valve-body {
+  width: 44px; height: 44px;
+  background: #F0FDF4;
+  border-radius: 12px;
+  border: 2px solid #86EFAC;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+
+/* Re-circ pump */
+#recirc-pump {
+  position: absolute;
+  top: 108px; right: 20px;
+}
+.pump-body {
+  width: 52px; height: 52px;
+  background: #EFF6FF;
+  border-radius: 50%;
+  border: 2px solid #93C5FD;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+/* DO sensor */
+#do-sensor {
+  position: absolute;
+  top: 220px; right: 24px;
+}
+.sensor-body {
+  width: 44px; height: 44px;
+  background: white;
+  border-radius: 10px;
+  border: 1.5px solid #E2E8F0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1px;
+}
+.sensor-val { font-size: 11px; font-weight: 700; color: #1E293B; }
+.sensor-unit { font-size: 8px; color: #94A3B8; font-weight: 500; }
+
+/* Outlet */
+#outlet-node {
+  position: absolute;
+  bottom: 60px; right: 20px;
+}
+
+/* Warning badge on blower2 */
+.warn-badge {
+  position: absolute;
+  top: -4px; right: -4px;
+  width: 18px; height: 18px;
+  background: #F59E0B;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800; color: white;
+  border: 2px solid white;
+}
+
+/* ═══════════════════════════════
+   BOONDI CHARACTER
+═══════════════════════════════ */
+#boondi-wrap {
+  position: absolute;
+  left: 155px;
+  top: 860px;          /* starts below fold */
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 200;
+  cursor: pointer;
+  /* JS drives the transition */
+  transition: left 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+              top  1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Speech bubble */
+.bubble {
+  position: relative;
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 18px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #1E293B;
+  line-height: 1.5;
+  width: 200px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  margin-bottom: 10px;
+  opacity: 0;
+  transform: translateY(6px) scale(0.96);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+}
+.bubble.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 9px solid transparent;
+  border-top-color: white;
+  border-bottom: 0;
+}
+.bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 10px solid transparent;
+  border-top-color: #E2E8F0;
+  border-bottom: 0;
+}
+.bubble .devanagari {
+  font-size: 13px;
+  color: #1E293B;
+  font-weight: 500;
+}
+
+/* Boondi SVG container */
+#boondi-char {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Float animation */
+@keyframes float {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-7px); }
+}
+@keyframes float-fast {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-5px); }
+}
+@keyframes glow-pulse {
+  0%,100% { filter: drop-shadow(0 6px 16px rgba(59,130,246,0.3)); }
+  50%      { filter: drop-shadow(0 6px 28px rgba(59,130,246,0.65)); }
+}
+@keyframes glow-success {
+  0%   { filter: drop-shadow(0 0 0px rgba(34,197,94,0)); }
+  40%  { filter: drop-shadow(0 0 32px rgba(34,197,94,0.9)); }
+  100% { filter: drop-shadow(0 6px 18px rgba(34,197,94,0.4)); }
+}
+@keyframes bounce-in {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  55%  { transform: scale(1.18) rotate(6deg); opacity: 1; }
+  75%  { transform: scale(0.94) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes appear {
+  from { opacity: 0; transform: scale(0.6) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.boondi-floating { animation: float 2.8s ease-in-out infinite, glow-pulse 2.6s ease-in-out infinite; }
+.boondi-eager    { animation: float-fast 1.6s ease-in-out infinite, glow-pulse 1.4s ease-in-out infinite; }
+
+#thumbs-char {
+  animation: bounce-in 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  display: none;
+  font-size: 72px;
+  line-height: 1;
+  text-align: center;
+  filter: drop-shadow(0 6px 20px rgba(34,197,94,0.45));
+}
+
+/* Pulse ring around target equipment */
+.pulse-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 74px; height: 74px;
+  margin-top: -37px; margin-left: -37px;
+  border-radius: 50%;
+  border: 2.5px solid #3B82F6;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 150;
+}
+@keyframes ring-pulse {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  100% { transform: scale(1.9); opacity: 0;   }
+}
+.pulse-ring.active { animation: ring-pulse 1.4s ease-out infinite; }
+
+/* ── Confetti particles ── */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 300;
+  animation: particle-go 0.8s ease-out forwards;
+}
+@keyframes particle-go {
+  0%   { opacity: 1; transform: scale(1) translate(0, 0); }
+  100% { opacity: 0; transform: scale(0.2) var(--tx); }
+}
+
+/* ── Diagnostic screen ── */
+#diag-screen {
+  position: absolute;
+  inset: 0;
+  background: #F7F9FC;
+  z-index: 250;
+  transform: translateX(100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  padding: 16px 16px 32px;
+}
+#diag-screen.open { transform: translateX(0); }
+
+.diag-boondi-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 16px;
+  min-height: 88px;
+}
+.diag-bubble {
+  flex: 1;
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 18px 18px 18px 4px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1E293B;
+  line-height: 1.5;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.35s ease 0.3s, transform 0.35s ease 0.3s;
+}
+#diag-screen.open .diag-bubble { opacity: 1; transform: translateX(0); }
+
+.diag-boondi-char { flex-shrink: 0; }
+
+.diag-question {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E293B;
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+
+.diag-options { display: flex; flex-direction: column; gap: 10px; }
+
+.diag-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: white;
+  border: 1.5px solid #E8EDF4;
+  border-radius: 16px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  text-align: left;
+}
+.diag-option:active { transform: scale(0.98); }
+.diag-option:hover  { border-color: #CBD5E1; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.diag-option.selected { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+
+.diag-icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+.diag-icon.green  { background: #DCFCE7; }
+.diag-icon.yellow { background: #FEF9C3; }
+.diag-icon.red    { background: #FEE2E2; }
+
+.diag-opt-text { flex: 1; }
+.diag-opt-title { font-size: 14px; font-weight: 600; color: #1E293B; }
+.diag-opt-sub   { font-size: 11.5px; color: #64748B; margin-top: 2px; line-height: 1.4; }
+
+.diag-back {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 16px;
+  background: none; border: 2px solid transparent; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: #64748B;
+  font-family: inherit;
+  padding: 6px 12px;
+  border-radius: 100px;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.diag-back svg { color: inherit; }
+@keyframes back-glow {
+  0%   { background: #EFF6FF; border-color: #3B82F6; color: #1D4ED8;
+         box-shadow: 0 0 0 4px rgba(59,130,246,0.15); }
+  60%  { background: #DBEAFE; border-color: #2563EB; color: #1D4ED8;
+         box-shadow: 0 0 0 8px rgba(59,130,246,0.1); }
+  100% { background: #EFF6FF; border-color: #3B82F6; color: #1D4ED8;
+         box-shadow: 0 0 0 4px rgba(59,130,246,0.15); }
+}
+.diag-back.glow {
+  animation: back-glow 0.7s ease-in-out 2;
+}
+
+/* ── Intro overlay (restart button) ── */
+.restart-btn {
+  position: absolute;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  background: #1E293B;
+  color: white;
+  border: none;
+  border-radius: 100px;
+  padding: 12px 28px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 50;
+  letter-spacing: 0.01em;
+}
+.restart-btn.show { opacity: 1; pointer-events: auto; }
+
+/* ── Hint tap ── */
+.tap-hint {
+  position: absolute;
+  bottom: 86px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30,41,59,0.06);
+  color: #64748B;
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 50;
+  white-space: nowrap;
+}
+.tap-hint.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="scene">
+
+  <!-- Background grid -->
+  <div class="plant-bg"></div>
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <svg width="15" height="10" viewBox="0 0 16 10"><rect x="0" y="5" width="3" height="5" rx="1" fill="currentColor"/><rect x="4" y="3" width="3" height="7" rx="1" fill="currentColor"/><rect x="8" y="1" width="3" height="9" rx="1" fill="currentColor"/><rect x="12" y="0" width="3" height="10" rx="1" fill="currentColor"/></svg>
+      <svg width="22" height="10" viewBox="0 0 24 10"><rect x="0.5" y="0.5" width="20" height="9" rx="2" fill="none" stroke="currentColor"/><rect x="2" y="2" width="15" height="6" rx="1" fill="currentColor"/><rect x="21" y="3" width="2" height="4" rx="1" fill="currentColor"/></svg>
+    </div>
+  </div>
+
+  <!-- App header -->
+  <div class="app-header">
+    <div class="header-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 5 8.5 5 14a7 7 0 0014 0C19 8.5 12 2 12 2Z" fill="white"/></svg>
+    </div>
+    <span class="header-title">Digital Paani</span>
+    <span class="header-sub">STP Plant · Shift A</span>
+  </div>
+
+  <!-- Equipment content area -->
+  <div class="content">
+
+    <!-- Pipe / connector SVG -->
+    <svg class="pipes-layer" viewBox="0 0 390 744" preserveAspectRatio="none">
+      <g stroke="#CBD5E1" stroke-width="5" fill="none" stroke-linecap="round">
+        <!-- Inlet → Basin -->
+        <path d="M64,46 H110"/>
+        <!-- Blower 1 → Basin left -->
+        <path d="M82,117 H110"/>
+        <!-- Blower 2 → Basin mid-left -->
+        <path d="M82,225 H110 V204"/>
+        <!-- Blower 3 → Basin bottom-left -->
+        <path d="M82,333 H110 V204"/>
+        <!-- Basin → Re-circ pump -->
+        <path d="M306,148 H338"/>
+        <!-- Re-circ pump → down -->
+        <path d="M365,183 V250"/>
+        <!-- DO sensor pipe -->
+        <path d="M340,250 H365"/>
+        <!-- Outlet flow -->
+        <path d="M365,320 V390 H330"/>
+      </g>
+      <!-- Flow direction arrows -->
+      <g fill="#CBD5E1">
+        <polygon points="108,44 100,40 100,48"/>
+        <polygon points="336,146 328,142 328,150"/>
+      </g>
+    </svg>
+
+    <!-- Inlet valve -->
+    <div id="inlet-valve" class="eq-node">
+      <div class="valve-body">⬡</div>
+      <span class="eq-label">Inlet<br>Valve</span>
+    </div>
+
+    <!-- CASS Basin -->
+    <div class="cass-basin">
+      <div class="basin-zones">
+        <div class="basin-zone">Z1</div>
+        <div class="basin-zone">Z2</div>
+        <div class="basin-zone">Z3</div>
+      </div>
+      <!-- Impellers -->
+      <svg style="position:absolute;top:22px;left:0;width:100%;height:62px;" viewBox="0 0 196 62">
+        <g transform="translate(38,31)">
+          <circle cx="0" cy="0" r="22" fill="none" stroke="#93C5FD" stroke-width="1.5"/>
+          <line x1="0" y1="-22" x2="0" y2="22" stroke="#93C5FD" stroke-width="2"/>
+          <line x1="-22" y1="0" x2="22" y2="0" stroke="#93C5FD" stroke-width="2"/>
+          <circle cx="0" cy="0" r="6" fill="#BFDBFE"/>
+        </g>
+        <g transform="translate(98,31)">
+          <circle cx="0" cy="0" r="22" fill="none" stroke="#93C5FD" stroke-width="1.5"/>
+          <line x1="0" y1="-22" x2="0" y2="22" stroke="#93C5FD" stroke-width="2"/>
+          <line x1="-22" y1="0" x2="22" y2="0" stroke="#93C5FD" stroke-width="2"/>
+          <circle cx="0" cy="0" r="6" fill="#BFDBFE"/>
+        </g>
+        <g transform="translate(158,31)">
+          <circle cx="0" cy="0" r="22" fill="none" stroke="#93C5FD" stroke-width="1.5"/>
+          <line x1="0" y1="-22" x2="0" y2="22" stroke="#93C5FD" stroke-width="2"/>
+          <line x1="-22" y1="0" x2="22" y2="0" stroke="#93C5FD" stroke-width="2"/>
+          <circle cx="0" cy="0" r="6" fill="#BFDBFE"/>
+        </g>
+      </svg>
+      <span class="basin-label">CASS BASIN–1 · 4500 KL</span>
+    </div>
+
+    <!-- SBR Blower 1 -->
+    <div id="blower1" class="eq-node">
+      <div class="eq-body blower-body" style="position:relative;">
+        <span class="blower-icon">🌀</span>
+        <span class="blower-label-text">BLW-01</span>
+      </div>
+      <span class="eq-label">SBR Blower 1</span>
+    </div>
+
+    <!-- SBR Blower 2 — TARGET for Boondi -->
+    <div id="blower2" class="eq-node" style="top:196px;left:24px;">
+      <div id="blower2-body" class="eq-body blower-body" style="position:relative;width:62px;height:62px;border-color:#F59E0B;">
+        <span class="warn-badge">!</span>
+        <span class="blower-icon">🌀</span>
+        <span class="blower-label-text">BLW-02</span>
+      </div>
+      <!-- pulse ring anchored to blower2 -->
+      <div class="pulse-ring" id="pulseRing"></div>
+      <span class="eq-label">SBR Blower 2</span>
+    </div>
+
+    <!-- SBR Blower 3 -->
+    <div id="blower3" class="eq-node">
+      <div class="eq-body blower-body">
+        <span class="blower-icon">🌀</span>
+        <span class="blower-label-text">BLW-03</span>
+      </div>
+      <span class="eq-label">SBR Blower 3</span>
+    </div>
+
+    <!-- Re-circ pump A -->
+    <div id="recirc-pump" class="eq-node">
+      <div class="pump-body">⚙️</div>
+      <span class="eq-label">Re-Circ<br>Pump A</span>
+    </div>
+
+    <!-- DO sensor -->
+    <div id="do-sensor" class="eq-node">
+      <div class="sensor-body">
+        <span class="sensor-val">1.8</span>
+        <span class="sensor-unit">mg/L DO</span>
+      </div>
+      <span class="eq-label">DO Sensor</span>
+    </div>
+
+    <!-- ═══ BOONDI CHARACTER ═══ -->
+    <div id="boondi-wrap">
+      <!-- Speech bubble -->
+      <div class="bubble" id="bubble">
+        <span class="devanagari" id="bubble-text">नमस्ते! मैं बूंदी हूँ।<br>आज मैं आपका सहायक हूँ।</span>
+      </div>
+
+      <!-- Boondi droplet -->
+      <div id="boondi-char" class="boondi-floating">
+        <svg width="80" height="96" viewBox="0 0 80 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="bodyGrad" cx="38%" cy="32%" r="65%">
+              <stop offset="0%"   stop-color="#93C5FD"/>
+              <stop offset="100%" stop-color="#2563EB"/>
+            </radialGradient>
+            <radialGradient id="shineGrad" cx="30%" cy="25%" r="50%">
+              <stop offset="0%"   stop-color="white" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="white" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <!-- Droplet body -->
+          <path d="M40,4 C52,14 74,36 74,54 C74,71 58,86 40,86 C22,86 6,71 6,54 C6,36 28,14 40,4 Z" fill="url(#bodyGrad)"/>
+          <!-- Shine highlight -->
+          <path d="M40,4 C52,14 74,36 74,54 C74,71 58,86 40,86 C22,86 6,71 6,54 C6,36 28,14 40,4 Z" fill="url(#shineGrad)"/>
+          <!-- Eyes -->
+          <circle cx="28" cy="54" r="5.5" fill="#1E3A5F"/>
+          <circle cx="52" cy="54" r="5.5" fill="#1E3A5F"/>
+          <!-- Eye shine -->
+          <circle cx="30" cy="52" r="2" fill="white"/>
+          <circle cx="54" cy="52" r="2" fill="white"/>
+          <!-- Smile -->
+          <path d="M28,66 Q40,76 52,66" stroke="#1E3A5F" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+          <!-- Cheeks -->
+          <circle cx="20" cy="62" r="5" fill="#93C5FD" opacity="0.5"/>
+          <circle cx="60" cy="62" r="5" fill="#93C5FD" opacity="0.5"/>
+        </svg>
+      </div>
+
+      <!-- Thumbs-up (hidden until success) -->
+      <div id="thumbs-char">👍</div>
+    </div>
+
+    <!-- Tap hint -->
+    <div class="tap-hint" id="tapHint">बूंदी पर क्लिक करें 👆</div>
+
+    <!-- Restart -->
+    <button class="restart-btn" id="restartBtn" onclick="restart()">फिर से चलाएं ↺</button>
+
+    <!-- ═══ DIAGNOSTIC SCREEN ═══ -->
+    <div id="diag-screen">
+      <button class="diag-back" onclick="closeDiag()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        वापस जाएं
+      </button>
+
+      <!-- Boondi + speech bubble row -->
+      <div class="diag-boondi-row">
+        <div class="diag-boondi-char" id="diagBoondi">
+          <svg width="56" height="68" viewBox="0 0 80 96" fill="none" xmlns="http://www.w3.org/2000/svg" style="animation:float 2.8s ease-in-out infinite,glow-pulse 2.6s ease-in-out infinite">
+            <defs>
+              <radialGradient id="bg2" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#93C5FD"/><stop offset="100%" stop-color="#2563EB"/></radialGradient>
+              <radialGradient id="bs2" cx="30%" cy="25%" r="50%"><stop offset="0%" stop-color="white" stop-opacity="0.55"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient>
+            </defs>
+            <path d="M40,4 C52,14 74,36 74,54 C74,71 58,86 40,86 C22,86 6,71 6,54 C6,36 28,14 40,4 Z" fill="url(#bg2)"/>
+            <path d="M40,4 C52,14 74,36 74,54 C74,71 58,86 40,86 C22,86 6,71 6,54 C6,36 28,14 40,4 Z" fill="url(#bs2)"/>
+            <circle cx="28" cy="54" r="5.5" fill="#1E3A5F"/>
+            <circle cx="52" cy="54" r="5.5" fill="#1E3A5F"/>
+            <circle cx="30" cy="52" r="2" fill="white"/>
+            <circle cx="54" cy="52" r="2" fill="white"/>
+            <path d="M28,66 Q40,76 52,66" stroke="#1E3A5F" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+            <circle cx="20" cy="62" r="5" fill="#93C5FD" opacity="0.5"/>
+            <circle cx="60" cy="62" r="5" fill="#93C5FD" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="diag-bubble" id="diagBubble">
+          <strong>जाँच शुरू कीजिए</strong> 👇<br>
+          <span style="font-size:11.5px;color:#64748B;">नीचे से सही विकल्प चुनें</span>
+        </div>
+      </div>
+
+      <!-- Question -->
+      <div class="diag-question">
+        एयरएशन टैंक के ऊपर खड़े हो कर देखें।<br>पानी का मूवमेंट और मीडिया (अगर MBBR है) की हलचल कैसी है?
+      </div>
+
+      <!-- Options -->
+      <div class="diag-options">
+
+        <button class="diag-option" onclick="selectDiag(this,'ok')">
+          <div class="diag-icon green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <div class="diag-opt-text">
+            <div class="diag-opt-title">सामान्य</div>
+            <div class="diag-opt-sub">पूरे टैंक में सब यूनिफार्म और ठीक है</div>
+          </div>
+        </button>
+
+        <button class="diag-option" onclick="selectDiag(this,'warn')">
+          <div class="diag-icon yellow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5" stroke-linecap="round"><path d="M12 9v4"/><circle cx="12" cy="17" r="1" fill="#D97706"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+          </div>
+          <div class="diag-opt-text">
+            <div class="diag-opt-title">डेड जोन</div>
+            <div class="diag-opt-sub">कुछ कोने में कोई मूवमेंट नहीं है</div>
+          </div>
+        </button>
+
+        <button class="diag-option" onclick="selectDiag(this,'warn2')">
+          <div class="diag-icon red">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"><path d="M2 12 C5 8 8 16 11 12 C14 8 17 16 20 12"/><path d="M2 17 C5 13 8 21 11 17 C14 13 17 21 20 17"/></svg>
+          </div>
+          <div class="diag-opt-text">
+            <div class="diag-opt-title">असामान्य मीडिया हलचल</div>
+            <div class="diag-opt-sub">कुछ जगह ज़्यादा, कुछ जगह कम</div>
+          </div>
+        </button>
+
+        <button class="diag-option" onclick="selectDiag(this,'crit')">
+          <div class="diag-icon red">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="3" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <div class="diag-opt-text">
+            <div class="diag-opt-title">कोई मूवमेंट नहीं है</div>
+            <div class="diag-opt-sub">पूरे टैंक में कहीं पे भी कुछ हलचल नहीं है</div>
+          </div>
+        </button>
+
+      </div>
+    </div><!-- /diag-screen -->
+
+  </div><!-- /content -->
+</div><!-- /scene -->
+
+<script>
+/* ═══════════════════════════════════════════════
+   STATE MACHINE
+   0 = hidden (below fold)
+   1 = center greeting
+   2 = moving to blower2
+   3 = at equipment, inviting click
+   4 = success (thumbs up)
+═══════════════════════════════════════════════ */
+
+const wrap      = document.getElementById('boondi-wrap');
+const bubble    = document.getElementById('bubble');
+const bubbleTxt = document.getElementById('bubble-text');
+const boondiSVG = document.getElementById('boondi-char');
+const thumbsSVG = document.getElementById('thumbs-char');
+const pulseRing = document.getElementById('pulseRing');
+const tapHint   = document.getElementById('tapHint');
+const restartBtn= document.getElementById('restartBtn');
+
+let state = 0;
+let speechReady = false;
+
+/* ── Speech Synthesis ── */
+function speak(text, onEnd) {
+  if (!window.speechSynthesis) { onEnd && onEnd(); return; }
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang  = 'hi-IN';
+  utt.rate  = 0.88;
+  utt.pitch = 1.1;
+  utt.volume = 1;
+  if (onEnd) utt.onend = onEnd;
+  /* Try to pick a Hindi voice */
+  const voices = window.speechSynthesis.getVoices();
+  const hindi  = voices.find(v => v.lang === 'hi-IN') ||
+                 voices.find(v => v.lang.startsWith('hi')) ||
+                 voices[0];
+  if (hindi) utt.voice = hindi;
+  window.speechSynthesis.speak(utt);
+}
+
+/* Wait for voices to load (Chrome defers this) */
+window.speechSynthesis.onvoiceschanged = () => { speechReady = true; };
+
+/* ── Position helpers ── */
+function moveBoondi(left, top) {
+  wrap.style.left = left + 'px';
+  wrap.style.top  = top  + 'px';
+}
+
+function showBubble(html, delaySec) {
+  return new Promise(res => {
+    setTimeout(() => {
+      bubbleTxt.innerHTML = html;
+      bubble.classList.add('show');
+      res();
+    }, delaySec * 1000);
+  });
+}
+
+function hideBubble() {
+  bubble.classList.remove('show');
+}
+
+/* ── Confetti burst ── */
+function confetti(x, y) {
+  const colors = ['#3B82F6','#60A5FA','#34D399','#FBBF24','#F472B6','#A78BFA'];
+  for (let i = 0; i < 14; i++) {
+    const p  = document.createElement('div');
+    const sz = 6 + Math.random() * 8;
+    const ang = (i / 14) * 360;
+    const r   = 50 + Math.random() * 60;
+    const tx  = `translate(${Math.cos(ang * Math.PI/180) * r}px, ${Math.sin(ang * Math.PI/180) * r}px)`;
+    p.className = 'particle';
+    p.style.cssText = `
+      width:${sz}px; height:${sz}px;
+      background:${colors[i % colors.length]};
+      left:${x}px; top:${y}px;
+      --tx:${tx};
+    `;
+    document.querySelector('.content').appendChild(p);
+    setTimeout(() => p.remove(), 900);
+  }
+}
+
+/* ══════════════════════════════
+   SEQUENCE
+══════════════════════════════ */
+async function runSequence() {
+  state = 1;
+
+  /* Step 1 — Boondi slides up to center */
+  wrap.style.transition = 'left 0.8s cubic-bezier(0.4,0,0.2,1), top 1s cubic-bezier(0.22,1,0.36,1)';
+  moveBoondi(155, 350);
+
+  await delay(0.9);
+
+  /* Show greeting bubble */
+  bubbleTxt.innerHTML = 'नमस्ते! मैं <strong>बूंदी</strong> हूँ,<br>आज मैं आपकी सहायक हूँ।';
+  bubble.classList.add('show');
+
+  /* Speak greeting */
+  speak('नमस्ते! मैं बूंदी हूँ। आज मैं आपकी सहायक हूँ।');
+
+  await delay(3.8);
+
+  /* Step 2 — Boondi moves toward blower-2 */
+  state = 2;
+  hideBubble();
+
+  await delay(0.4);
+
+  /* blower2 is at top:196 left:24 within .content (which starts at top:100 in scene)
+     Boondi wrap is absolutely within .content
+     Blower2 center ≈ content-relative: left=24+31=55, top=196+31=227
+     Position boondi slightly above-right so bubble clears */
+  wrap.style.transition = 'left 1.4s cubic-bezier(0.4,0,0.2,1), top 1.3s cubic-bezier(0.4,0,0.2,1)';
+  moveBoondi(60, 158);
+
+  /* Switch to eager animation */
+  boondiSVG.className = 'boondi-eager';
+
+  await delay(1.5);
+
+  /* Step 3 — At equipment, invite click */
+  state = 3;
+  pulseRing.classList.add('active');
+
+  bubbleTxt.innerHTML = 'जाँच के लिए<br><strong>मुझपे क्लिक कीजिए</strong> 👆';
+  bubble.classList.add('show');
+  tapHint.classList.add('show');
+
+  speak('जाँच के लिए मुझपे क्लिक कीजिए।');
+}
+
+/* ── Click handler (state 3 → 4) ── */
+wrap.addEventListener('click', () => {
+  if (state !== 3) return;
+  state = 4;
+
+  hideBubble();
+  tapHint.classList.remove('show');
+  pulseRing.classList.remove('active');
+
+  /* Morph to thumbs-up */
+  boondiSVG.style.display = 'none';
+  thumbsSVG.style.display = 'block';
+
+  /* Confetti - relative to boondi position in content */
+  const rect = wrap.getBoundingClientRect();
+  const contentRect = document.querySelector('.content').getBoundingClientRect();
+  confetti(rect.left - contentRect.left + 44, rect.top - contentRect.top + 48);
+
+  /* Success bubble */
+  setTimeout(() => {
+    bubbleTxt.innerHTML = '✅ <strong>बहुत अच्छा!</strong><br>जाँच शुरू हो गई।';
+    bubble.classList.add('show');
+    speak('बहुत अच्छा! जाँच शुरू हो गई।');
+  }, 500);
+
+  /* After 2.5s revert Boondi droplet, then open diagnostic screen */
+  setTimeout(() => {
+    hideBubble();
+    thumbsSVG.style.display = 'none';
+    boondiSVG.style.display = '';
+    boondiSVG.className = 'boondi-eager';
+    pulseRing.classList.remove('active');
+    state = 5;
+
+    /* Short pause then slide in diagnostic screen */
+    setTimeout(() => {
+      hideBubble();
+      tapHint.classList.remove('show');
+      wrap.style.opacity = '0';
+      wrap.style.pointerEvents = 'none';
+      document.getElementById('diag-screen').classList.add('open');
+      speak('जाँच शुरू कीजिए।');
+    }, 400);
+  }, 2600);
+});
+
+/* ── Close diagnostic → back to plant ── */
+function closeDiag() {
+  document.getElementById('diag-screen').classList.remove('open');
+  wrap.style.opacity = '1';
+  wrap.style.pointerEvents = '';
+  /* Re-enter waiting state at blower */
+  state = 3;
+  pulseRing.classList.add('active');
+  boondiSVG.className = 'boondi-eager';
+  setTimeout(() => {
+    bubbleTxt.innerHTML = 'जाँच के लिए<br><strong>मुझपे क्लिक कीजिए</strong> 👆';
+    bubble.classList.add('show');
+    tapHint.classList.add('show');
+  }, 350);
+}
+
+/* ── Diagnostic option selected ── */
+function selectDiag(el, type) {
+  document.querySelectorAll('.diag-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const msgs = {
+    ok:    'बहुत अच्छा! टैंक सामान्य है।',
+    warn:  'ठीक है। डेड जोन की जाँच होगी।',
+    warn2: 'समझ गए। मीडिया की हलचल जाँची जाएगी।',
+    crit:  'ध्यान दें! ब्लोअर चेक करें।',
+  };
+
+  const followUp = 'आगे बढ़िए। या वापस जाने के लिए यहाँ पे क्लिक कीजिए।';
+
+  const bubble = document.getElementById('diagBubble');
+  bubble.innerHTML = '<strong>' + msgs[type] + '</strong>';
+
+  /* Speak selection, then after it ends say follow-up and light up the back button */
+  speak(msgs[type], () => {
+    bubble.innerHTML = '<strong>' + msgs[type] + '</strong>'
+      + '<br><span style="font-size:11.5px;color:#3B82F6;font-weight:500;">'
+      + 'आगे बढ़िए, या वापस जाएं 👆</span>';
+    speak(followUp);
+
+    /* Pulse-highlight वापस जाएं button for ~2s */
+    const backBtn = document.querySelector('.diag-back');
+    backBtn.classList.add('glow');
+    setTimeout(() => backBtn.classList.remove('glow'), 2000);
+  });
+}
+
+/* ── Restart ── */
+function restart() {
+  state = 0;
+  window.speechSynthesis.cancel();
+  document.getElementById('diag-screen').classList.remove('open');
+  document.querySelectorAll('.diag-option').forEach(o => o.classList.remove('selected'));
+
+  bubble.classList.remove('show');
+  tapHint.classList.remove('show');
+  restartBtn.classList.remove('show');
+  pulseRing.classList.remove('active');
+  boondiSVG.style.display = '';
+  thumbsSVG.style.display = 'none';
+  boondiSVG.className = 'boondi-floating';
+
+  wrap.style.opacity = '1';
+  wrap.style.pointerEvents = '';
+  wrap.style.transition = 'none';
+  moveBoondi(155, 860);
+
+  setTimeout(() => runSequence(), 300);
+}
+
+function delay(sec) {
+  return new Promise(r => setTimeout(r, sec * 1000));
+}
+
+/* Auto-start */
+setTimeout(() => runSequence(), 600);
+</script>
+
+</body>
+</html>
